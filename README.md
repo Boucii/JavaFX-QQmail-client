@@ -4,6 +4,8 @@ an qq mail client with inbox and sending main using javamail
 this is a simple qqmail client using javafx and javamail .
 the protocol i used are smtp and pop3
 
+**Comments are written in english**
+**注释是用英语写的**
 
 there are totally 3 pages, which are inbox,send mail,settings
 the src structure is : 
@@ -36,7 +38,7 @@ css file
 controller of the ui ,core datas  , controls mailbox
 
 
-the outcome is like below:(the image seems not showing,click the /image folader)
+the outcome is like below:
 
 
 ![](https://github.com/Boucii/JavaFX-QQmail-client/raw/master/image/settings.png)
