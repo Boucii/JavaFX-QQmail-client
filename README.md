@@ -1,6 +1,8 @@
 # JavaFX-QQmail-client
 an qq mail client with inbox and sending main using javamail
 
+QQ邮箱客户端，javamail以及javafx实现
+
 this is a simple qqmail client using javafx and javamail .
 the protocol i used are smtp and pop3
 
