@@ -39,7 +39,7 @@ controller of the ui ,core datas  , controls mailbox
 the outcome is like below:(the image seems not showing,click the /image folader)
 
 
-![image](https://github.com/Boucii/JavaFX-QQmail-client/tree/master/image/settings.png)
-![image](https://github.com/Boucii/JavaFX-QQmail-client/tree/master/image/inbox.png)
-![image](https://github.com/Boucii/JavaFX-QQmail-client/tree/master/image/inbox2.png)
-![image](https://github.com/Boucii/JavaFX-QQmail-client/tree/master/image/sendmail.png)
+![](https://github.com/Boucii/JavaFX-QQmail-client/raw/master/image/settings.png)
+![](https://github.com/Boucii/JavaFX-QQmail-client/raw/master/image/inbox.png)
+![](https://github.com/Boucii/JavaFX-QQmail-client/raw/master/image/inbox2.png)
+![](https://github.com/Boucii/JavaFX-QQmail-client/raw/master/image/sendmail.png)
