@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.mail.BodyPart;
 import javax.mail.Folder;
@@ -22,20 +24,25 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class controller {
+	@FXML
+	private AnchorPane MainPane;
 	@FXML
 	private Button QuitButton;
 	@FXML
@@ -80,12 +87,18 @@ public class controller {
 	private WebView web;
 	@FXML
 	public ProgressIndicator loading;
+	@FXML
+	private RadioButton DownAttachButton;
+	@FXML
+	private Label AttachPath;
 	
 	
-	static int j=0;
+	static int j=0;//number of msg in folder
 	String account="";
 	String pwd="";
 	static Folder folder = null; 
+	static boolean DownAttchment=true;
+	private static File AttachmentPath=new File("D:\\");
 	static ArrayList<String> ListofAttachments = new ArrayList<String>();//paths of attachs
 	ObservableList<String> list = FXCollections.observableArrayList();//paths of attachs,for listview
 	static ObservableList<String> Maillist = FXCollections.observableArrayList();//mails in the inbox
@@ -97,7 +110,39 @@ public class controller {
 		this.ChooseMail.setCellFactory(param -> new MailBList("OPEN"));
 		
 		
-	} 
+	}
+	
+	public void DownAttach() {
+		DownAttchment=DownAttachButton.isSelected();
+	}
+	public static File GetAttachPath() {
+		return AttachmentPath;
+	}
+	public static boolean GetAttachStatus() {
+		return DownAttchment;
+	}
+	public void SetAttachPath() {
+		System.out.println(AttachmentPath);
+		DirectoryChooser file=new DirectoryChooser();
+        file.setTitle("Choose the local dirctionary for Attachment Download");
+        file.setInitialDirectory(AttachmentPath);
+        Stage stage = (Stage) AttachPath.getScene().getWindow();
+        File path =  file.showDialog(stage);
+        if(path!=null) {
+        AttachmentPath=path;
+        }
+	}
+	private synchronized void call (ExecutorService executor,String acc,String pwd) {
+
+        loadBox loader= new loadBox();
+        loader.loading=this.loading;
+        loader.account = acc;
+        loader.pwd= pwd ;
+        loader.ChooseMail = ChooseMail ;
+        loader.MailDisplay= this.MailDisplay;
+        System.out.println("exe thread");
+        executor.execute(loader);
+    }
 	
 	public TextArea GetMailDisplay() {
 		return this.MailDisplay;
@@ -116,14 +161,20 @@ public class controller {
 		SendPane.setDisable(false);
 		SendPane.setVisible(true);
 		
+		if(account.length()==0||pwd.length()==0) {
+			EditField.appendText("Please Fill in your infos");
+		}else {
+			EditField.clear();
+		}
 	}
 	//open inboxpage
 	public void OpenBox() {
-		//this.loading.setVisible(true);
-		//this.loading.setDisable(false);
+		this.loading.setVisible(true);
+		this.loading.setDisable(false);
 		
 		SendPane.setDisable(true);
 		SendPane.setVisible(false);
+		
 		SettingPane.setDisable(true);
 		SettingPane.setVisible(false);
 		
@@ -131,66 +182,18 @@ public class controller {
 		BoxPane.setVisible(true);
 		
 		if(account.length()+pwd.length()<2) {
-			//this.loading.setVisible(false);
-			//this.loading.setDisable(true);
+			this.loading.setVisible(false);
+			this.loading.setDisable(true);
 			this.MailDisplay.setText("Please fill in your infos");
 		}else {
 			this.MailDisplay.clear();
-			LoadMails(account,pwd);
-			//this.loading.setVisible(false);
-			//this.loading.setDisable(true);
-		}
-	}
-	//load mails to listview
-	public void LoadMails(String account,String pwd) {
-		 try {  
-	        	String host = "pop.qq.com";
-	        	String username=account;
-	        	String password=pwd;
-	            Properties props = new Properties();
-	            props.setProperty("mail.pop3.host", "pop.qq.com"); //pop3 protocol
-	            props.setProperty("mail.pop3.port", "995");
-	            // SSL安全连接参数
-	            props.setProperty("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-	            props.setProperty("mail.pop3.socketFactory.fallback", "true");
-	            props.setProperty("mail.pop3.socketFactory.port", "995");
+			
+			//LoadMails(account,pwd);
+			ExecutorService executor = Executors.newCachedThreadPool();
+			System.out.println("call thread");
+            call(executor,account,pwd);
 
-	            Session session = Session.getInstance(props);  
-	              
-	            Store store = (Store) session.getStore("pop3");  
-	            store.connect(username,password);  
-	            folder =  (Folder) store.getFolder("INBOX");  
-	            if (folder.exists())  {
-	            	folder.open(Folder.READ_ONLY);  
-	            	}
-	            Message[] messages = folder.getMessages(); 
-	            int i=messages.length;
-	            if(messages!=null&&messages.length>0){  
-	                for (j=0;j<i;j++) {  
-	                	Message message = messages[j];
-	                	System.out.println("j="+j);
-	                	
-	                	
-	                	boolean flag=message.getSubject().length()>30?true:false;
-	                	String date = new SimpleDateFormat("yyyy-MM-dd").format(message.getSentDate());//邮件的接受时间
-	                	String sub="";
-	                	if (flag==true) {
-	                		sub=message.getSubject().substring(0, 30);
-	                		sub=sub+"...";
-	                	}else {
-	                		sub=message.getSubject();
-	                	}
-	                	
-	                	//add index to the text,when open the mail ,locate the mail with the index
-	                	String num=String.valueOf(j);      	
-	                	Maillist.add(num+'.'+date+'\n'+sub+"\n________________");
-	                	
-	                }  ChooseMail.setItems(Maillist);
-	            }  
-	        } catch (Exception e) {  
-	        	this.MailDisplay.setText("Fetch Mails Failed");
-	            e.printStackTrace();  
-	        }  
+		}
 	}
 	//open settings index
 	public void OpenSetting() {
@@ -306,5 +309,75 @@ public class controller {
 		this.CloseWeb.setVisible(false);
 		this.web.setDisable(true);
 		this.web.setVisible(false);
+	}
+	/*class that loads mails into mailbox page,the reason to add this class
+	separately is the process indicator would not show if load mail was invoked in the main thread.
+	the load mail func would block the indicator to show.(indicator would 
+	show only after the load was finished)
+	*/
+	public class loadBox extends Thread{
+		@FXML
+		private ListView ChooseMail;
+		@FXML 
+		private TextArea MailDisplay;
+		@FXML
+		public ProgressIndicator loading;
+		String account;
+		String pwd;
+		public void run() {
+			LoadMails(account,pwd);
+			this.loading.setVisible(false);
+			this.loading.setDisable(true);
+		}
+		public void LoadMails(String account,String pwd) {
+			 try {  
+		        	String host = "pop.qq.com";
+		        	String username=account;
+		        	String password=pwd;
+		            Properties props = new Properties();
+		            props.setProperty("mail.pop3.host", "pop.qq.com"); //pop3 protocol
+		            props.setProperty("mail.pop3.port", "995");
+		            // SSL安全连接参数
+		            props.setProperty("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		            props.setProperty("mail.pop3.socketFactory.fallback", "true");
+		            props.setProperty("mail.pop3.socketFactory.port", "995");
+
+		            Session session = Session.getInstance(props);  
+		              
+		            Store store = (Store) session.getStore("pop3");  
+		            store.connect(username,password);  
+		            folder =  (Folder) store.getFolder("INBOX");  
+		            if (folder.exists())  {
+		            	folder.open(Folder.READ_ONLY);  
+		            	}
+		            Message[] messages = folder.getMessages(); 
+		            int i=messages.length;
+		            if(messages!=null&&messages.length>0){  
+		                for (j=0;j<i;j++) {  
+		                	Message message = messages[j];
+		                	System.out.println("j="+j);
+		                	
+		                	
+		                	boolean flag=message.getSubject().length()>30?true:false;
+		                	String date = new SimpleDateFormat("yyyy-MM-dd").format(message.getSentDate());//邮件的接受时间
+		                	String sub="";
+		                	if (flag==true) {
+		                		sub=message.getSubject().substring(0, 30);
+		                		sub=sub+"...";
+		                	}else {
+		                		sub=message.getSubject();
+		                	}
+		                	
+		                	//add index to the text,when open the mail ,locate the mail with the index
+		                	String num=String.valueOf(j);      	
+		                	Maillist.add(num+'.'+date+'\n'+sub+"\n________________");
+		                	
+		                }  ChooseMail.setItems(Maillist);
+		            }  
+		        } catch (Exception e) {  
+		        	this.MailDisplay.setText("Fetch Mails Failed");
+		            e.printStackTrace();  
+		        }  
+		}
 	}
 }

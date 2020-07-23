@@ -134,3 +134,31 @@
 .htmlButton:pressed{
 	-fx-background-color: #2F2B43 ;
 }
+.radio-button{
+	-fx-font-family: "Comic Sans MS Bold";
+	-fx-font-size: 25 ;
+	-fx-text-fill: #CE74C3;
+}
+
+.radio-button .radio{
+-fx-border-width     : 3px   ;
+-fx-background-radius : 30px ;
+-fx-border-color     : linear-gradient(to right, #A868A0, #2D75E8);
+-fx-background-color : #191026 ;
+-fx-background-image : null  ;
+-fx-border-radius    : 30px  ;
+}
+.radio-button .dot {
+  -fx-mark-highlight-color: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+  -fx-mark-color: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+}
+.AttachPath{
+	-fx-font-family: "Comic Sans MS Bold";
+	-fx-font-size: 25 ;
+	-fx-text-fill:#CE74C3;
+}
+.AttachPath:hover{
+	-fx-font-family: "Comic Sans MS Bold";
+	-fx-font-size: 25 ;
+	-fx-text-fill:gold;
+}

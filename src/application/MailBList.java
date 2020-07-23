@@ -1,5 +1,6 @@
 package application;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,6 +110,7 @@ public class MailBList extends ListCell<String>{
             if (!msg.isMimeType("multipart/*")) {
             	Control.appendMsg((String)(msg.getContent())); 
             } else {
+            	boolean flag=controller.GetAttachStatus();
                 Multipart mp = (Multipart) msg.getContent();
                 int bodynum = mp.getCount();
                 for (int i = 0; i < bodynum; i++) {
@@ -116,10 +118,11 @@ public class MailBList extends ListCell<String>{
                     if (bp.isMimeType("application/*")) {     
                         String disposition = bp.getDisposition();     
                         System.out.println(disposition);     
-                        if (disposition.equalsIgnoreCase(BodyPart.ATTACHMENT)) {     
+                        if (disposition.equalsIgnoreCase(BodyPart.ATTACHMENT)&&flag) {     
                             String fileName = bp.getFileName();     
-                            InputStream is = bp.getInputStream();     
-                            copy(is, new FileOutputStream("D:\\"+fileName));  //attachment path   
+                            InputStream is = bp.getInputStream();  
+                            File AttachPath=controller.GetAttachPath();
+                            copy(is, new FileOutputStream(AttachPath+fileName));  //attachment path   
                         }     
                     }     
                     
